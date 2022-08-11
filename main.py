@@ -1,5 +1,6 @@
 from random import shuffle
 from logics import *
+from constants import *
 import pygame
 import sys
 
@@ -17,7 +18,7 @@ def draw_interface(score, delta=0):
     if delta > 0:
         text_delta = font_delta.render(f'+{delta}', True, COLOR_TEXT)
         screen.blit(text_delta, (170, 85))
-    pretty_print(mas)
+
     for row in range(BLOCKS):
         for column in range(BLOCKS):
             value = mas[row][column]
@@ -32,8 +33,6 @@ def draw_interface(score, delta=0):
                 screen.blit(text, (text_x, text_y))
 
 
-
-
 def get_empty_list(mas):
     empty = []
     for i in range(4):
@@ -43,24 +42,7 @@ def get_empty_list(mas):
                 empty.append(num)
     return empty
 
-COLOR_TEXT = (255, 127, 0)
-COLORS = {
-    0: (130, 130, 130),
-    2: (255, 255, 255),
-    4: (255, 255, 128),
-    8: (255, 255, 130),
-    16: (255, 235, 255),
-    32: (255, 235, 128),
-    64: (255, 235, 0),
-}
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GRAY = (130, 130, 130)
-BLOCKS = 4
-SIZE_BLOCK = 110
-MARGIN = 10
-WIDTH = BLOCKS * SIZE_BLOCK + (BLOCKS + 1) * MARGIN
-HEIGHT = WIDTH + 110
+
 TITLE_REC = pygame.Rect(0, 0, WIDTH, 110)
 score = 0
 
@@ -69,12 +51,51 @@ mas[1][2] = 2
 mas[3][0] = 4
 
 
-print(get_empty_list(mas))
-pretty_print(mas)
-
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('2048')
+
+
+def draw_intro():
+    img2048 = pygame.image.load('2048_logo.svg.png')
+    font = pygame.font.SysFont('stxingkai', 70)
+    text_welcome = font.render('Welcome!', True, WHITE)
+    name = 'Enter your name'
+    #len_name_error_txt = 'Длина имени должна быть больше 2-х символов'
+    is_find_name = False
+
+    while not is_find_name:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                if event.unicode.isalpha():
+                    if name == 'Enter your name':
+                        name = event.unicode
+                    else:
+                        name += event.unicode
+                elif event.key == pygame.K_BACKSPACE:
+                    name = name[:-1]
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                    if len(name) > 2:
+                        global USERNAME
+                        USERNAME = name
+                        is_find_name = True
+                        break
+
+        screen.fill(BLACK)
+        text_name = font.render(name, True, WHITE)
+        rect_name = text_name.get_rect()
+        rect_name.center = screen.get_rect().center
+        screen.blit(pygame.transform.scale(img2048, [200, 200]), [145, 10])
+        screen.blit(text_welcome, (155, 220))
+        screen.blit(text_name, rect_name)
+        pygame.display.update()
+    screen.fill(BLACK)
+
+
+draw_intro()
 draw_interface(score)
 pygame.display.update()
 is_mas_move = False
@@ -86,13 +107,13 @@ while is_zero_in_mas(mas) or can_move(mas):
         elif event.type == pygame.KEYDOWN:
             delta = 0
             if event.key == pygame.K_LEFT:
-                mas, delta, is_mas_move = move_left(mas)
+                mas, delta, is_mas_move = swipe(mas, 'LEFT')
             elif event.key == pygame.K_RIGHT:
-                mas, delta, is_mas_move = move_right(mas)
+                mas, delta, is_mas_move = swipe(mas, 'RIGHT')
             elif event.key == pygame.K_UP:
-                mas, delta, is_mas_move = move_up(mas)
+                mas, delta, is_mas_move = swipe(mas, 'UP')
             elif event.key == pygame.K_DOWN:
-                mas, delta, is_mas_move = move_down(mas)
+                mas, delta, is_mas_move = swipe(mas, 'DOWN')
             score += delta
             if is_zero_in_mas(mas) and is_mas_move:
 
@@ -105,4 +126,6 @@ while is_zero_in_mas(mas) or can_move(mas):
                 is_mas_move = False
         draw_interface(score)
         pygame.display.update()
-
+else:
+    draw_interface(score)
+    pygame.display.update()

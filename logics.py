@@ -2,11 +2,12 @@ from random import choice
 import copy
 
 
-def pretty_print(mas):
-    print('-' * 10)
-    for row in mas:
-        print(*row)
-    print('-' * 10)
+rotate_count = {
+    "LEFT": 0,
+    "UP": 3,
+    "RIGHT": 2,
+    "DOWN": 1
+}
 
 
 def can_move(mas):
@@ -32,7 +33,7 @@ def get_index_from_number(num):
 
 
 def insert_2_or_4(mas, x, y):
-    mas[x][y] = choice((2, 2, 4))
+    mas[x][y] = choice((2, 2, 2, 2, 2, 2, 2, 2, 2, 4))
     return mas
 
 
@@ -54,8 +55,6 @@ def is_zero_in_mas(mas):
 
 
 def move_left(mas):
-    # сохраним массив до хода
-    origin = copy. deepcopy(mas)
     delta = 0
     for row in mas:
         while 0 in row:
@@ -69,66 +68,123 @@ def move_left(mas):
                 delta += mas[i][j]
                 mas[i].pop(j + 1)
                 mas[i].append(0)
-    return mas, delta, not origin == mas
+    return mas, delta
 
 
-def move_right(mas):
+def rotate_ccw(mas):
+    # поворот против часовой стрелки
+    new_matrix = [[0] * 4 for i in range(4)]
+
+    for row in range(4):
+        for col in range(4):
+            new_matrix[col][3 - row] = mas[row][col]
+    return new_matrix
+
+
+def rotate_cw(mas):
+    # поворот по часовой стрелке
+    for i in range(3):
+        mas = rotate_ccw(mas)
+    return mas
+
+
+def swipe(mas, direction):
+    # сохраним массив до хода
     origin = copy.deepcopy(mas)
-    delta = 0
-    for row in mas:
-        while 0 in row:
-            row.remove(0)
-        while len(row) != 4:
-            row.insert(0, 0)
-    for i in range(4):
-        for j in range(3, 0, -1):
-            if mas[i][j] == mas[i][j - 1] and mas[i][j] != 0:
-                mas[i][j] *= 2
-                delta += mas[i][j]
-                mas[i].pop(j - 1)
-                mas[i].insert(0, 0)
-    return mas, delta, not origin == mas
+
+    rotates = rotate_count[direction]
+
+    for i in range(rotates):
+        mas = rotate_ccw(mas)
+
+    mas, delta = move_left(mas)
+    print(delta)
+
+    for i in range(rotates):
+        mas = rotate_cw(mas)
+
+    return mas, delta, origin != mas
 
 
-def move_up(mas):
-    delta = 0
-    origin = copy.deepcopy(mas)
-    for j in range(4):
-        column = []
-        for i in range(4):
-            if mas[i][j] != 0:
-                column.append(mas[i][j])
-        while len(column) != 4:
-            column.append(0)
-        for i in range(3):
-            if column[i] == column[i + 1] and column[i] != 0:
-                column[i] *= 2
-                delta += column[i]
-                column.pop(i + 1)
-                column.append(0)
-        for i in range(4):
-            mas[i][j] = column[i]
+def is_move_is_possible(mas, direction):
+    return mas != swipe(mas, direction)
 
-    return mas, delta, not origin == mas
-
-
-def move_down(mas):
-    delta = 0
-    origin = copy.deepcopy(mas)
-    for j in range(4):
-        column = []
-        for i in range(4):
-            if mas[i][j] != 0:
-                column.append(mas[i][j])
-        while len(column) != 4:
-            column.append(0)
-        for i in range(3):
-            if column[i] == column[i + 1] and column[i] != 0:
-                column[i] *= 2
-                delta += column[i]
-                column.pop(i + 1)
-                column.insert(0, 0)
-        for i in range(4):
-            mas[i][j] = column[-i]
-
-    return mas, delta, not origin == mas
+#def move_left(mas):
+#    # сохраним массив до хода
+#    origin = copy. deepcopy(mas)
+#    delta = 0
+#    for row in mas:
+#        while 0 in row:
+#            row.remove(0)
+#        while len(row) != 4:
+#            row.append(0)
+#    for i in range(4):
+#        for j in range(3):
+#            if mas[i][j] == mas[i][j + 1] and mas[i][j] != 0:
+#                mas[i][j] *= 2
+#                delta += mas[i][j]
+#                mas[i].pop(j + 1)
+#                mas[i].append(0)
+#    return mas, delta, not origin == mas
+#
+#
+#def move_right(mas):
+#    origin = copy.deepcopy(mas)
+#    delta = 0
+#    for row in mas:
+#        while 0 in row:
+#            row.remove(0)
+#        while len(row) != 4:
+#            row.insert(0, 0)
+#    for i in range(4):
+#        for j in range(3, 0, -1):
+#            if mas[i][j] == mas[i][j - 1] and mas[i][j] != 0:
+#                mas[i][j] *= 2
+#                delta += mas[i][j]
+#                mas[i].pop(j - 1)
+#                mas[i].insert(0, 0)
+#    return mas, delta, not origin == mas
+#
+#
+#def move_up(mas):
+#    delta = 0
+#    origin = copy.deepcopy(mas)
+#    for j in range(4):
+#        column = []
+#        for i in range(4):
+#            if mas[i][j] != 0:
+#                column.append(mas[i][j])
+#        while len(column) != 4:
+#            column.append(0)
+#        for i in range(3):
+#            if column[i] == column[i + 1] and column[i] != 0:
+#                column[i] *= 2
+#                delta += column[i]
+#                column.pop(i + 1)
+#                column.append(0)
+#        for i in range(4):
+#            mas[i][j] = column[i]
+#
+#    return mas, delta, not origin == mas
+#
+#
+#def move_down(mas):
+#    delta = 0
+#    origin = copy.deepcopy(mas)
+#    for j in range(4):
+#        column = []
+#        for i in range(4):
+#            if mas[i][j] != 0:
+#                column.append(mas[i][j])
+#        while len(column) != 4:
+#            column.append(0)
+#        for i in range(-3, -1, -1):
+#            if column[i] == column[i + 1] and column[i] != 0:
+#                column[i] *= 2
+#                delta += column[i]
+#                column.pop(i + 1)
+#                column.append(0)
+#        for i in range(-3, 0, -1):
+#            mas[i][j] = column[i]
+#
+#    return mas, delta, not origin == mas
