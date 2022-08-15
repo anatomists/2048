@@ -1,10 +1,28 @@
 from random import shuffle
-
 from logics import *
 from constants import *
 from database import *
 import pygame
 import sys
+
+
+def init_const():
+    global score, mas
+    mas = [[0 for _ in range(4)] for _ in range(4)]
+    score = 0
+    empty = get_empty_list(mas)
+    shuffle(empty)
+    random_num1 = empty.pop()
+    random_num2 = empty.pop()
+    x1, y1 = get_index_from_number(random_num1)
+    mas = insert_2_or_4(mas, x1, y1)
+    x2, y2 = get_index_from_number(random_num2)
+    mas = insert_2_or_4(mas, x2, y2)
+
+
+mas = None
+score = None
+init_const()
 
 TITLE_REC = pygame.Rect(0, 0, WIDTH, 110)
 pygame.init()
@@ -126,7 +144,6 @@ def game_loop():
                     random_num = empty.pop()
                     x, y = get_index_from_number(random_num)
                     mas = insert_2_or_4(mas, x, y)
-                    print(f'Мы заполнили элемент под номерсм {random_num}')
                     is_mas_move = False
             draw_interface(score, delta)
             pygame.display.update()
@@ -162,25 +179,23 @@ def draw_game_over():
 
         for row in range(len(mas_game_over)):
             for column in range(4):
+                screen.fill(BLACK)
                 value = mas_game_over[row][column]
                 text = font.render(f'{value}', True, RED)
                 w = column * SIZE_BLOCK + (column + 1) * MARGIN
                 h = row * SIZE_BLOCK + (row + 1) * MARGIN + SIZE_BLOCK
                 pygame.draw.rect(screen, BLACK, (w, h, SIZE_BLOCK, SIZE_BLOCK))
-
                 font_w, font_h = text.get_size()
                 text_x = w + (SIZE_BLOCK - font_w) / 2
                 text_y = h + (SIZE_BLOCK - font_h) / 2
-
-
                 screen.blit(text, (text_x, text_y))
-
                 screen.blit(text_restart, (70, 500))
                 pygame.display.update()
     screen.fill(BLACK)
 
 
 while True:
+    global USERNAME
     if USERNAME is None:
         draw_intro()
 
